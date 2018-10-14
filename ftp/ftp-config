@@ -1,0 +1,70 @@
+1.ftp服务:
+	yum install vsftpd -y;
+
+2.ftp 启动关闭
+	service vsftpd restart/start/stop
+3.配置详解
+	# 匿名用户配置   
+	anonymous_enable=YES         # 是否允许匿名ftp,如否则选择NO   
+	anon_upload_enable=YES       # 匿名用户是否能上传   
+	anon_mkdir_write_enable=YES  # 匿名用户是否能创建目录   
+	anon_other_write_enable=YES  # 修改文件名和删除文件   
+	
+	# 本地用户配置   
+	local_enable=YES # 是否允许本地用户登录   
+	local_umask=022  # umask 默认755   
+	write_enable=YES   
+	chroot_local_user=YES  # 本地用户禁锢在宿主目录中   
+	chroot_list_enable=YES # 是否将系统用户限止在自己的home目录下   
+	chroot_list_file=/etc/vsftpd.chroot_list # 列出的是不chroot的用户的列表   
+	chown_upload=YES  # 是否改变上传文件的属主   
+	chown_username=username # 如果是需要输入一个系统用户名   
+	userlist_enable=YES   
+	userlist_deny=NO   
+	deny_email_enable=YES # 是否允许禁止匿名用户使用某些邮件地址   
+	banned_email_file=/etc/vsftpd.banned_emails # 禁止邮件地址的文件路径   
+	ftpd_banner=Welcome to chenlf FTP service. # 定制欢迎信息   
+	dirmessage_enable=YES # 是否显示目录说明文件, 需要收工创建.message文件   
+	message_file= # 设置访问一个目录时获得的目录信息文件的文件名,默认是.message   
+	xferlog_enable=YES # 是否记录ftp传输过程   
+	xferlog_file=/var/log/vsftpd.log # ftp传输日志的路径和名字   
+	xferlog_std_format=YES # 是否使用标准的ftp xferlog模式   
+	ascii_upload_enable=YES   # 是否使用ascii码方式上传文件   
+	ascii_download_enable=YES # 是否使用ascii码方式下载文件   
+	connect_from_port_20=YES # 是否确信端口传输来自20(ftp-data)   
+	nopriv_user=ftpsecure # 运行vsftpd需要的非特权系统用户默认是nobody   
+	async_abor_enable=YES # 是否允许运行特殊的ftp命令async ABOR.   
+	 
+	# FTP服务器的资源限制   
+	idle_session_timeout=600 # 设置session超时时间   
+	data_connection_timeout=120 # 设置数据传输超时时间   
+	max_clients=50 # 用户最大连接数 默认是0不限止   
+	max_per_ip=5   # 每个IP地址最大连接数   
+	anon_max_rate=102400  # 匿名的下载速度 KB   
+	local_max_rate=102400 # 普通用户的下载速度 KB   
+
+
+4.用户及用户权限:
+	1>groupadd ftpgroups
+	2>useradd -d /home/ftp/ftptest -g ftpgroups ftptest
+		chown -R ftptest /home/ftp/ftptest  #目录权限赋予
+	3>passwd ftptest
+	4>usermod -s /sbin/nologin ftptest  #表明不能用户系统登录
+
+	5>用户登录权限控制：
+		userlist_enable=YES 	 	#开启功能
+　　		userlist_deny=NO 	  		# NO表示只让user_list中的用户登录，YES表示拒绝user_list用户的登录
+　　		userlist_file=/etc/vsftpd/user_list   #配置用户名
+	6>用户访问权限控制
+		chroot_list_enable=YES，删除前面的那个#号，表示开启此限制功能
+　　		chroot_list_file=/etc/vsftpd/chroot_list
+
+
+
+
+5.问题：
+	selinu安全问题(无法登录)：
+		1>getsebool -a |grep ftp
+		2>setsebool ftp_home_dir 1
+
+
